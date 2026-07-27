@@ -1,0 +1,258 @@
+import { useAuth } from "@/_core/hooks/useAuth";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { getLoginUrl } from "@/const";
+import { trpc } from "@/lib/trpc";
+import { motion } from "framer-motion";
+import { ArrowRight, Code2, ExternalLink, Github, Mail, Sparkles } from "lucide-react";
+import { Link } from "wouter";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+
+export default function Home() {
+  const { user, isAuthenticated } = useAuth();
+  const { data: featuredProjects = [] } = trpc.projects.featured.useQuery();
+  const { data: skills = [] } = trpc.skills.list.useQuery();
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.2,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.5 },
+    },
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col bg-background">
+      <Header />
+
+      <main className="flex-1">
+        {/* Hero Section */}
+        <section className="relative overflow-hidden py-20 md:py-32">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-secondary/10 pointer-events-none" />
+          
+          <div className="container relative z-10">
+            <motion.div
+              className="max-w-4xl mx-auto text-center"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+            >
+              <motion.div
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.1 }}
+              >
+                <Sparkles className="w-4 h-4 text-primary" />
+                <span className="text-sm font-medium text-primary">مرحباً بك في خيال النقيب</span>
+              </motion.div>
+
+              <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent">
+                خيال النقيب
+              </h1>
+
+              <p className="text-lg md:text-xl text-foreground/70 mb-8 max-w-2xl mx-auto">
+                مطور ويب وصانع محتوى تقني متخصص في بناء تطبيقات ويب حديثة وقابلة للتوسع. أحول الأفكار إلى حقيقة رقمية.
+              </p>
+
+              <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+                <Link href="/projects">
+                  <Button size="lg" className="gap-2">
+                    عرض المشاريع
+                    <ArrowRight className="w-4 h-4" />
+                  </Button>
+                </Link>
+                <Link href="/contact">
+                  <Button size="lg" variant="outline">
+                    تواصل معي
+                  </Button>
+                </Link>
+              </div>
+
+              {/* Social Links */}
+              <div className="flex gap-4 justify-center">
+                <a href="https://github.com" target="_blank" rel="noopener noreferrer">
+                  <Button variant="ghost" size="icon" className="rounded-full">
+                    <Github className="w-5 h-5" />
+                  </Button>
+                </a>
+                <a href="https://twitter.com" target="_blank" rel="noopener noreferrer">
+                  <Button variant="ghost" size="icon" className="rounded-full">
+                    <Mail className="w-5 h-5" />
+                  </Button>
+                </a>
+                <a href="mailto:contact@example.com">
+                  <Button variant="ghost" size="icon" className="rounded-full">
+                    <Mail className="w-5 h-5" />
+                  </Button>
+                </a>
+              </div>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* Featured Projects */}
+        {featuredProjects.length > 0 && (
+          <section className="py-20 md:py-32 bg-card/50">
+            <div className="container">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                viewport={{ once: true }}
+                className="mb-12"
+              >
+                <h2 className="text-3xl md:text-4xl font-bold mb-4">أبرز المشاريع</h2>
+                <p className="text-foreground/60">بعض من أفضل المشاريع التي عملت عليها</p>
+              </motion.div>
+
+              <motion.div
+                className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
+                variants={containerVariants}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+              >
+                {featuredProjects.slice(0, 3).map((project) => (
+                  <motion.div key={project.id} variants={itemVariants}>
+                    <Card className="group h-full overflow-hidden hover:shadow-lg transition-shadow">
+                      {project.imageUrl && (
+                        <div className="relative h-48 overflow-hidden bg-muted">
+                          <img
+                            src={project.imageUrl}
+                            alt={project.title}
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                          />
+                        </div>
+                      )}
+                      <div className="p-6">
+                        <div className="flex items-start justify-between mb-3">
+                          <h3 className="font-bold text-lg">{project.title}</h3>
+                          <Code2 className="w-5 h-5 text-primary flex-shrink-0" />
+                        </div>
+                        <p className="text-sm text-foreground/60 mb-4">{project.description}</p>
+                        <div className="flex gap-2 flex-wrap mb-4">
+                          {project.technologies &&
+                            JSON.parse(project.technologies).map((tech: string) => (
+                              <span
+                                key={tech}
+                                className="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary"
+                              >
+                                {tech}
+                              </span>
+                            ))}
+                        </div>
+                        <div className="flex gap-2">
+                          {project.link && (
+                            <a href={project.link} target="_blank" rel="noopener noreferrer">
+                              <Button size="sm" variant="outline" className="gap-1">
+                                <ExternalLink className="w-4 h-4" />
+                                عرض
+                              </Button>
+                            </a>
+                          )}
+                          {project.githubLink && (
+                            <a href={project.githubLink} target="_blank" rel="noopener noreferrer">
+                              <Button size="sm" variant="outline" className="gap-1">
+                                <Github className="w-4 h-4" />
+                                الكود
+                              </Button>
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    </Card>
+                  </motion.div>
+                ))}
+              </motion.div>
+
+              <div className="text-center mt-12">
+                <Link href="/projects">
+                  <Button size="lg" variant="outline" className="gap-2">
+                    عرض جميع المشاريع
+                    <ArrowRight className="w-4 h-4" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Skills Section */}
+        {skills.length > 0 && (
+          <section className="py-20 md:py-32">
+            <div className="container">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                viewport={{ once: true }}
+                className="mb-12"
+              >
+                <h2 className="text-3xl md:text-4xl font-bold mb-4">المهارات التقنية</h2>
+                <p className="text-foreground/60">التقنيات والأدوات التي أتقنها</p>
+              </motion.div>
+
+              <motion.div
+                className="grid md:grid-cols-2 lg:grid-cols-4 gap-6"
+                variants={containerVariants}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+              >
+                {skills.slice(0, 8).map((skill) => (
+                  <motion.div key={skill.id} variants={itemVariants}>
+                    <Card className="p-6 text-center hover:shadow-lg transition-shadow">
+                      <div className="text-3xl mb-3">{skill.icon || "🔧"}</div>
+                      <h3 className="font-bold mb-2">{skill.name}</h3>
+                      <p className="text-sm text-foreground/60">{skill.proficiency}</p>
+                    </Card>
+                  </motion.div>
+                ))}
+              </motion.div>
+            </div>
+          </section>
+        )}
+
+        {/* CTA Section */}
+        <section className="py-20 md:py-32 bg-gradient-to-r from-primary/10 via-secondary/10 to-primary/10">
+          <div className="container">
+            <motion.div
+              className="max-w-2xl mx-auto text-center"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+            >
+              <h2 className="text-3xl md:text-4xl font-bold mb-6">هل لديك مشروع في الذهن؟</h2>
+              <p className="text-lg text-foreground/70 mb-8">
+                دعنا نتحدث عن كيفية تحويل فكرتك إلى واقع رقمي مذهل
+              </p>
+              <Link href="/contact">
+                <Button size="lg" className="gap-2">
+                  ابدأ المحادثة
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+              </Link>
+            </motion.div>
+          </div>
+        </section>
+      </main>
+
+      <Footer />
+    </div>
+  );
+}

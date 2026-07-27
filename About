@@ -1,0 +1,231 @@
+import { Card } from "@/components/ui/card";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import { motion } from "framer-motion";
+import { Award, BookOpen, Code2, Zap } from "lucide-react";
+
+export default function About() {
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.2,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.5 },
+    },
+  };
+
+  const experiences = [
+    {
+      title: "مطور ويب كامل المكدس",
+      company: "الشركة الأولى",
+      period: "2022 - الحالي",
+      description: "تطوير تطبيقات ويب باستخدام React و Node.js وقواعد البيانات المختلفة",
+    },
+    {
+      title: "مطور Frontend",
+      company: "الشركة الثانية",
+      period: "2021 - 2022",
+      description: "بناء واجهات مستخدم تفاعلية باستخدام React و Vue.js",
+    },
+    {
+      title: "مطور Junior",
+      company: "الشركة الثالثة",
+      period: "2020 - 2021",
+      description: "تطوير مواقع ويب باستخدام HTML و CSS و JavaScript",
+    },
+  ];
+
+  const achievements = [
+    {
+      icon: Code2,
+      title: "50+ مشروع",
+      description: "تم إكمال أكثر من 50 مشروع بنجاح",
+    },
+    {
+      icon: Award,
+      title: "جوائز متعددة",
+      description: "حصلت على عدة جوائز في مجال تطوير الويب",
+    },
+    {
+      icon: Zap,
+      title: "أداء عالي",
+      description: "تطبيقات بأداء ممتاز وسرعة تحميل سريعة",
+    },
+    {
+      icon: BookOpen,
+      title: "محتوى تعليمي",
+      description: "أنشر محتوى تعليمي منتظم عن تطوير الويب",
+    },
+  ];
+
+  return (
+    <div className="min-h-screen flex flex-col bg-background">
+      <Header />
+
+      <main className="flex-1">
+        {/* Hero Section */}
+        <section className="py-20 md:py-32 bg-gradient-to-br from-primary/10 via-transparent to-secondary/10">
+          <div className="container">
+            <motion.div
+              className="max-w-3xl mx-auto"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+            >
+              <h1 className="text-4xl md:text-5xl font-bold mb-6">من أنا؟</h1>
+              <p className="text-lg text-foreground/70 leading-relaxed">
+                أنا خيال النقيب، مطور ويب متخصص في بناء تطبيقات ويب حديثة وقابلة للتوسع. بدأت رحلتي في البرمجة منذ سنوات وأصبحت شغوفاً بتطوير الويب والتكنولوجيا. أؤمن بأن التكنولوجيا يجب أن تحل المشاكل الحقيقية وتحسن حياة الناس.
+              </p>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* About Content */}
+        <section className="py-20 md:py-32">
+          <div className="container">
+            <div className="grid md:grid-cols-2 gap-12 mb-20">
+              {/* Text Content */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6 }}
+                viewport={{ once: true }}
+              >
+                <h2 className="text-3xl font-bold mb-6">رحلتي المهنية</h2>
+                <p className="text-foreground/70 mb-4 leading-relaxed">
+                  بدأت رحلتي في البرمجة بفضول بسيط حول كيفية عمل المواقع. مع الوقت، تطورت مهاراتي وأصبحت متخصصاً في تطوير الويب بكامل مكوناته.
+                </p>
+                <p className="text-foreground/70 mb-4 leading-relaxed">
+                  عملت مع عدة شركات وعملاء مختلفين، وتعلمت الكثير من كل تجربة. أحب التعاون مع فريق موهوب والعمل على مشاريع تحدي.
+                </p>
+                <p className="text-foreground/70 leading-relaxed">
+                  اليوم، أركز على مساعدة الشركات والأفراد في تحويل أفكارهم إلى تطبيقات ويب فعالة وجميلة.
+                </p>
+              </motion.div>
+
+              {/* Achievements */}
+              <motion.div
+                className="grid grid-cols-2 gap-4"
+                variants={containerVariants}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+              >
+                {achievements.map((achievement, index) => {
+                  const Icon = achievement.icon;
+                  return (
+                    <motion.div key={index} variants={itemVariants}>
+                      <Card className="p-6 text-center hover:shadow-lg transition-shadow">
+                        <Icon className="w-8 h-8 mx-auto mb-3 text-primary" />
+                        <h3 className="font-bold mb-2">{achievement.title}</h3>
+                        <p className="text-sm text-foreground/60">{achievement.description}</p>
+                      </Card>
+                    </motion.div>
+                  );
+                })}
+              </motion.div>
+            </div>
+
+            {/* Experience Timeline */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+            >
+              <h2 className="text-3xl font-bold mb-12">خبرتي المهنية</h2>
+              <div className="space-y-6">
+                {experiences.map((exp, index) => (
+                  <motion.div
+                    key={index}
+                    className="relative pl-8 pb-8 border-l-2 border-primary/30 last:pb-0"
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                    viewport={{ once: true }}
+                  >
+                    <div className="absolute -left-3 top-0 w-4 h-4 rounded-full bg-primary" />
+                    <Card className="p-6">
+                      <div className="flex justify-between items-start mb-2">
+                        <h3 className="font-bold text-lg">{exp.title}</h3>
+                        <span className="text-sm text-foreground/60">{exp.period}</span>
+                      </div>
+                      <p className="text-primary font-semibold mb-2">{exp.company}</p>
+                      <p className="text-foreground/70">{exp.description}</p>
+                    </Card>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* Skills Section */}
+        <section className="py-20 md:py-32 bg-card/50">
+          <div className="container">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+              className="mb-12"
+            >
+              <h2 className="text-3xl font-bold mb-4">المهارات الرئيسية</h2>
+              <p className="text-foreground/60">التقنيات والأدوات التي أتقنها بشكل عميق</p>
+            </motion.div>
+
+            <motion.div
+              className="grid md:grid-cols-3 gap-6"
+              variants={containerVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+            >
+              {[
+                {
+                  category: "Frontend",
+                  skills: ["React", "Vue.js", "Tailwind CSS", "TypeScript", "Next.js"],
+                },
+                {
+                  category: "Backend",
+                  skills: ["Node.js", "Express", "Python", "PostgreSQL", "MongoDB"],
+                },
+                {
+                  category: "Tools & DevOps",
+                  skills: ["Git", "Docker", "AWS", "CI/CD", "Vercel"],
+                },
+              ].map((skillGroup, index) => (
+                <motion.div key={index} variants={itemVariants}>
+                  <Card className="p-6">
+                    <h3 className="font-bold text-lg mb-4">{skillGroup.category}</h3>
+                    <ul className="space-y-2">
+                      {skillGroup.skills.map((skill) => (
+                        <li key={skill} className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full bg-primary" />
+                          <span className="text-foreground/70">{skill}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </Card>
+                </motion.div>
+              ))}
+            </motion.div>
+          </div>
+        </section>
+      </main>
+
+      <Footer />
+    </div>
+  );
+}

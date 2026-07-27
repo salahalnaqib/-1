@@ -1,0 +1,178 @@
+import { useAuth } from "@/_core/hooks/useAuth";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import DashboardLayout from "@/components/DashboardLayout";
+import { trpc } from "@/lib/trpc";
+import { motion } from "framer-motion";
+import { FileText, MessageSquare, Zap } from "lucide-react";
+import { Link } from "wouter";
+
+export default function Dashboard() {
+  const { user, loading } = useAuth();
+  const { data: projects = [] } = trpc.projects.list.useQuery();
+  const { data: unreadCount = 0 } = trpc.messages.unreadCount.useQuery();
+
+  if (loading) {
+    return <DashboardLayout><div /></DashboardLayout>;
+  }
+
+  if (!user || user.role !== "admin") {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Card className="p-8 text-center">
+          <h1 className="text-2xl font-bold mb-4">غير مصرح</h1>
+          <p className="text-foreground/60 mb-6">
+            ليس لديك صلاحيات للوصول إلى لوحة التحكم
+          </p>
+          <Link href="/">
+            <Button>العودة للرئيسية</Button>
+          </Link>
+        </Card>
+      </div>
+    );
+  }
+
+  const stats = [
+    {
+      icon: FileText,
+      label: "المشاريع",
+      value: projects.length,
+      href: "/dashboard/projects",
+    },
+    {
+      icon: MessageSquare,
+      label: "رسائل جديدة",
+      value: unreadCount,
+      href: "/dashboard/messages",
+    },
+    {
+      icon: Zap,
+      label: "الإحصائيات",
+      value: "قريباً",
+      href: "#",
+    },
+  ];
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.2,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.5 },
+    },
+  };
+
+  return (
+    <DashboardLayout>
+      <div className="space-y-8" role="main">
+        {/* Welcome Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <h1 className="text-3xl font-bold mb-2">مرحباً، {user.name}</h1>
+          <p className="text-foreground/60">
+            إليك ملخص نشاطك وإحصائياتك
+          </p>
+        </motion.div>
+
+        {/* Stats Grid */}
+        <motion.div
+          className="grid md:grid-cols-3 gap-6"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          {stats.map((stat, index) => {
+            const Icon = stat.icon;
+            return (
+              <motion.div key={index} variants={itemVariants}>
+                <Link href={stat.href}>
+                  <Card className="p-6 hover:shadow-lg transition-shadow cursor-pointer h-full">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <p className="text-sm text-foreground/60 mb-2">
+                          {stat.label}
+                        </p>
+                        <p className="text-3xl font-bold">{stat.value}</p>
+                      </div>
+                      <Icon className="w-8 h-8 text-primary opacity-20" />
+                    </div>
+                  </Card>
+                </Link>
+              </motion.div>
+            );
+          })}
+        </motion.div>
+
+        {/* Quick Actions */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+        >
+          <Card className="p-6">
+            <h2 className="text-xl font-bold mb-4">إجراءات سريعة</h2>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Link href="/dashboard/projects">
+                <Button className="gap-2">
+                  <FileText className="w-4 h-4" />
+                  إدارة المشاريع
+                </Button>
+              </Link>
+              <Link href="/dashboard/messages">
+                <Button variant="outline" className="gap-2">
+                  <MessageSquare className="w-4 h-4" />
+                  الرسائل
+                </Button>
+              </Link>
+            </div>
+          </Card>
+        </motion.div>
+
+        {/* Recent Projects */}
+        {projects.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+          >
+            <Card className="p-6">
+              <h2 className="text-xl font-bold mb-4">آخر المشاريع</h2>
+              <div className="space-y-3">
+                {projects.slice(0, 5).map((project) => (
+                  <div
+                    key={project.id}
+                    className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+                  >
+                    <div>
+                      <p className="font-medium">{project.title}</p>
+                      <p className="text-sm text-foreground/60">
+                        {project.category}
+                      </p>
+                    </div>
+                    <span className="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary">
+                      {project.featured ? "مميز" : "عادي"}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </motion.div>
+        )}
+      </div>
+    </DashboardLayout>
+  );
+}

@@ -1,0 +1,196 @@
+import { useAuth } from "@/_core/hooks/useAuth";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import DashboardLayout from "@/components/DashboardLayout";
+import { trpc } from "@/lib/trpc";
+import { motion } from "framer-motion";
+import { Trash2, Mail, Calendar } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+import { Link } from "wouter";
+
+export default function Messages() {
+  const { user } = useAuth();
+  const { data: messages = [], refetch } = trpc.messages.list.useQuery({});
+  const [selectedMessage, setSelectedMessage] = useState<number | null>(null);
+
+  const markAsRead = trpc.messages.markAsRead.useMutation({
+    onSuccess: () => {
+      refetch();
+    },
+  });
+
+  const deleteMessage = trpc.messages.delete.useMutation({
+    onSuccess: () => {
+      toast.success("تم حذف الرسالة بنجاح!");
+      refetch();
+    },
+    onError: () => {
+      toast.error("حدث خطأ في حذف الرسالة");
+    },
+  });
+
+  if (!user || user.role !== "admin") {
+    return (
+      <DashboardLayout>
+        <Card className="p-8 text-center">
+          <h1 className="text-2xl font-bold mb-4">غير مصرح</h1>
+          <p className="text-foreground/60 mb-6">
+            ليس لديك صلاحيات للوصول إلى هذه الصفحة
+          </p>
+          <Link href="/dashboard">
+            <Button>العودة لوحة التحكم</Button>
+          </Link>
+        </Card>
+      </DashboardLayout>
+    );
+  }
+
+  const handleDelete = (id: number) => {
+    if (confirm("هل أنت متأكد من حذف هذه الرسالة؟")) {
+      deleteMessage.mutate(id);
+    }
+  };
+
+  const handleSelectMessage = (id: number, read: number) => {
+    setSelectedMessage(id);
+    if (!read) {
+      markAsRead.mutate(id);
+    }
+  };
+
+  const selectedMsg = messages.find((m) => m.id === selectedMessage);
+
+  return (
+    <DashboardLayout>
+      <div className="space-y-8">
+        <h1 className="text-3xl font-bold">الرسائل</h1>
+
+        <div className="grid md:grid-cols-3 gap-6">
+          {/* Messages List */}
+          <div className="md:col-span-1">
+            <Card className="p-0 overflow-hidden">
+              <div className="divide-y divide-border max-h-96 overflow-y-auto">
+                {messages.length > 0 ? (
+                  messages.map((message) => (
+                    <motion.button
+                      key={message.id}
+                      className={`w-full text-left p-4 hover:bg-muted transition-colors ${
+                        selectedMessage === message.id ? "bg-muted" : ""
+                      } ${!message.read ? "border-l-4 border-primary" : ""}`}
+                      onClick={() => handleSelectMessage(message.id, message.read)}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                    >
+                      <p className="font-semibold text-sm">{message.name}</p>
+                      <p className="text-xs text-foreground/60 truncate">
+                        {message.subject}
+                      </p>
+                      <p className="text-xs text-foreground/40 mt-1">
+                        {new Date(message.createdAt).toLocaleDateString("ar-SA")}
+                      </p>
+                    </motion.button>
+                  ))
+                ) : (
+                  <div className="p-4 text-center text-foreground/60">
+                    لا توجد رسائل
+                  </div>
+                )}
+              </div>
+            </Card>
+          </div>
+
+          {/* Message Details */}
+          <div className="md:col-span-2">
+            {selectedMsg ? (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
+                <Card className="p-6">
+                  <div className="space-y-6">
+                    <div>
+                      <h2 className="text-2xl font-bold mb-2">
+                        {selectedMsg.subject}
+                      </h2>
+                      <div className="flex flex-col gap-2 text-sm text-foreground/60">
+                        <div className="flex items-center gap-2">
+                          <Mail className="w-4 h-4" />
+                          <span>{selectedMsg.email}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Calendar className="w-4 h-4" />
+                          <span>
+                            {new Date(selectedMsg.createdAt).toLocaleDateString(
+                              "ar-SA",
+                              {
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              }
+                            )}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="border-t border-border pt-6">
+                      <h3 className="font-semibold mb-3">الرسالة</h3>
+                      <p className="text-foreground/70 whitespace-pre-wrap">
+                        {selectedMsg.message}
+                      </p>
+                    </div>
+
+                    <div className="border-t border-border pt-6">
+                      <h3 className="font-semibold mb-3">معلومات المرسل</h3>
+                      <div className="space-y-2 text-sm">
+                        <p>
+                          <span className="text-foreground/60">الاسم:</span>{" "}
+                          {selectedMsg.name}
+                        </p>
+                        <p>
+                          <span className="text-foreground/60">البريد:</span>{" "}
+                          <a
+                            href={`mailto:${selectedMsg.email}`}
+                            className="text-primary hover:underline"
+                          >
+                            {selectedMsg.email}
+                          </a>
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-3 pt-6 border-t border-border">
+                      <Button
+                        variant="destructive"
+                        onClick={() => handleDelete(selectedMsg.id)}
+                        className="gap-2"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                        حذف الرسالة
+                      </Button>
+                      <a href={`mailto:${selectedMsg.email}`}>
+                        <Button variant="outline" className="gap-2">
+                          <Mail className="w-4 h-4" />
+                          رد على الرسالة
+                        </Button>
+                      </a>
+                    </div>
+                  </div>
+                </Card>
+              </motion.div>
+            ) : (
+              <Card className="p-12 text-center">
+                <p className="text-foreground/60">
+                  اختر رسالة لعرض التفاصيل
+                </p>
+              </Card>
+            )}
+          </div>
+        </div>
+      </div>
+    </DashboardLayout>
+  );
+}

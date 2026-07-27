@@ -1,0 +1,135 @@
+import { useAuth } from "@/_core/hooks/useAuth";
+import { Button } from "@/components/ui/button";
+import { getLoginUrl } from "@/const";
+import { motion } from "framer-motion";
+import { Menu, X } from "lucide-react";
+import { Link } from "wouter";
+import { useState } from "react";
+
+export default function Header() {
+  const { user, isAuthenticated, logout } = useAuth();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const navLinks = [
+    { href: "/", label: "الرئيسية" },
+    { href: "/about", label: "عني" },
+    { href: "/projects", label: "المشاريع" },
+    { href: "/contact", label: "تواصل" },
+  ];
+
+  return (
+    <header className="sticky top-0 z-50 border-b border-border/40 bg-background/80 backdrop-blur-sm">
+      <div className="container py-4">
+        <div className="flex items-center justify-between">
+          {/* Logo */}
+          <Link href="/">
+            <motion.div
+              className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent cursor-pointer"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              خيال النقيب
+            </motion.div>
+          </Link>
+
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center gap-1">
+            {navLinks.map((link) => (
+              <Link key={link.href} href={link.href}>
+                <Button variant="ghost" className="text-base">
+                  {link.label}
+                </Button>
+              </Link>
+            ))}
+          </nav>
+
+          {/* Auth Buttons */}
+          <div className="hidden md:flex items-center gap-3">
+            {isAuthenticated && user ? (
+              <>
+                <Link href="/dashboard">
+                  <Button variant="outline" size="sm">
+                    لوحة التحكم
+                  </Button>
+                </Link>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => logout()}
+                >
+                  تسجيل الخروج
+                </Button>
+              </>
+            ) : (
+              <a href={getLoginUrl()}>
+                <Button size="sm">
+                  تسجيل الدخول
+                </Button>
+              </a>
+            )}
+          </div>
+
+          {/* Mobile Menu Button */}
+          <button
+            className="md:hidden p-2"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            {mobileMenuOpen ? (
+              <X className="w-6 h-6" />
+            ) : (
+              <Menu className="w-6 h-6" />
+            )}
+          </button>
+        </div>
+
+        {/* Mobile Navigation */}
+        {mobileMenuOpen && (
+          <motion.nav
+            className="md:hidden mt-4 pb-4 space-y-2"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            {navLinks.map((link) => (
+              <Link key={link.href} href={link.href}>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start text-base"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {link.label}
+                </Button>
+              </Link>
+            ))}
+            <div className="pt-2 border-t border-border/40 space-y-2">
+              {isAuthenticated && user ? (
+                <>
+                  <Link href="/dashboard">
+                    <Button variant="outline" className="w-full">
+                      لوحة التحكم
+                    </Button>
+                  </Link>
+                  <Button
+                    variant="ghost"
+                    className="w-full"
+                    onClick={() => {
+                      logout();
+                      setMobileMenuOpen(false);
+                    }}
+                  >
+                    تسجيل الخروج
+                  </Button>
+                </>
+              ) : (
+                <a href={getLoginUrl()} className="block">
+                  <Button className="w-full">
+                    تسجيل الدخول
+                  </Button>
+                </a>
+              )}
+            </div>
+          </motion.nav>
+        )}
+      </div>
+    </header>
+  );
+}
