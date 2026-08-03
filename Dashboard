@@ -5,7 +5,7 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { trpc } from "@/lib/trpc";
 import { motion } from "framer-motion";
 import { FileText, MessageSquare, Zap } from "lucide-react";
-import { Link } from "wouter";
+import Link from "next/link";
 
 export default function Dashboard() {
   const { user, loading } = useAuth();
@@ -82,7 +82,7 @@ export default function Dashboard() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <h1 className="text-3xl font-bold mb-2">مرحباً، {user.name}</h1>
+          <h1 className="text-3xl font-bold mb-2">مرحباً، {user?.name ?? "المستخدم"}</h1>
           <p className="text-foreground/60">
             إليك ملخص نشاطك وإحصائياتك
           </p>
